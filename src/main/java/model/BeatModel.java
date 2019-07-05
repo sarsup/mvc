@@ -3,14 +3,7 @@ package model;
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import javax.sound.midi.MetaEventListener;
-import javax.sound.midi.MetaMessage;
-import javax.sound.midi.MidiEvent;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Track;
+import javax.sound.midi.*;
 
 public class BeatModel implements BeatModelInterface, MetaEventListener {
     
@@ -62,9 +55,27 @@ public class BeatModel implements BeatModelInterface, MetaEventListener {
             
             if (key != 0) {
                 track.add(makeEvent(144,9,key, 100, i));
-                track.add(makeEvent(128,9,key, 100, i+1));
+                MidiEvent midiEvent =
+                        makeEvent(128, 9, key, 100, i + 1);
+                track.add(midiEvent);
+                track.add(makeMetaEvent(midiEvent, i + 2));
             }
         }
+    }
+
+    private MidiEvent makeMetaEvent(MidiEvent midiEvent, int tick) {
+        MidiEvent event = null;
+
+        try {
+            MetaMessage message = new MetaMessage(47,
+                    midiEvent.getMessage().getMessage(),
+                    midiEvent.getMessage().getLength());
+            event = new MidiEvent(message, tick);
+        } catch (InvalidMidiDataException e) {
+            e.printStackTrace();
+        }
+
+        return event;
     }
     
     public MidiEvent makeEvent(int comd, int chan, int one, int two, int tick) {
@@ -102,7 +113,7 @@ public class BeatModel implements BeatModelInterface, MetaEventListener {
     
     @Override
     public void meta(MetaMessage message) {
-    
+
         if (message.getType() == 47) {
             beatEvent();
             sequencer.start();
