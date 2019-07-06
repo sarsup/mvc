@@ -2,6 +2,7 @@ plugins {
     id 'java'
 }
 
+apply plugin: 'idea'
 group 'com.teradata.designpatterns'
 version '1.0-SNAPSHOT'
 
